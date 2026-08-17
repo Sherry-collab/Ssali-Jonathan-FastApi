@@ -7,15 +7,15 @@ class Book(BaseModel):
     title: str
     author: str
     publisher: str
-    published_date: str
+    published_date: datetime | None = None 
     created_at: datetime
-    upadte_at: datetime
+    updated_at: datetime
     
 class BookCreateModel(BaseModel):
     title: str
     author: str
     publisher: str
-    published_date: str
+    published_date: datetime
 class BookUpdateModel(BaseModel):
     title: str
     author: str
