@@ -21,4 +21,4 @@ class Book(SQLModel, table= True):
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP(timezone=True),default=datetime.now))
     
     def __repr__(self):
-        return f"<Book {self.title}"
+        return f"<Book {self.title}>"
