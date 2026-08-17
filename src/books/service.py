@@ -22,8 +22,6 @@ class BookService:
             **book_data_dict
         )
         
-        new_book.published_date = book_data_dict['published_date']
-        
         session.add(new_book)
         await session.commit()
         return new_book
