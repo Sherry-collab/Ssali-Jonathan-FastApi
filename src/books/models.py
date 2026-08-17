@@ -10,14 +10,15 @@ class Book(SQLModel, table= True):
             pg.UUID,
             nullable= False,
             primary_key= True,
-            default= uuid.uuid4()
+            default= uuid.uuid4
         )
     )
     title: str
     author: str
     publisher: str
-    created_at:datetime = Field(Column(pg.TIMESTAMP,default=datetime.now))
-    updated_at:datetime = Field(Column(pg.TIMESTAMP,default=datetime.now))
+    published_date: str
+    created_at:datetime = Field(sa_column=Column(pg.TIMESTAMP,default=datetime.now))
+    updated_at:datetime = Field(sa_column=Column(pg.TIMESTAMP,default=datetime.now))
     
     def __repr__(self):
         return f"<Book {self.title}"
