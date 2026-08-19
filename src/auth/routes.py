@@ -20,3 +20,13 @@ async def create_user_account(user_data: UserCreateModel, sesssion: AsyncSession
     new_user = await user_service.create_user(user_data, sesssion)
     
     return new_user
+
+@auth_router.post('/Login',response_model= UserModel)
+async def login_user(user_data: UserCreateModel, session: AsyncSession = Depends(get_session)):
+    email = user_data.email
+    user_exists = await user_service.user_exist(email, session)
+    if user_exists:
+        new_user = await user_service.create_user(user_data, session)
+        return new_user
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User not exists")
