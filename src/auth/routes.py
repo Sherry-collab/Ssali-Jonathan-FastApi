@@ -6,7 +6,8 @@ from src.db.main import get_session
 from fastapi.exceptions import HTTPException
 from .utils import create_access_token,decode_token, verify_passwd
 from fastapi.responses import JSONResponse
-from datetime import timedelta
+from datetime import timedelta, datetime
+from .dependencies import RefreshTokenBearer
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -69,3 +70,19 @@ async def login_users(login_data: UserLoginModel, session: AsyncSession = Depend
         detail= "Invalid email or password"
     )
     
+@auth_router.get('/refresh_token')
+async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer())):
+    expiry_timestamp = token_details['exp']
+
+    if datetime.fromtimestamp(expiry_timestamp) > datetime.now():
+        new_access_token = create_access_token(
+            user_data=token_details['user']
+        )
+        
+        return JSONResponse(content={
+            "access_token": new_access_token,
+        })
+    raise HTTPException(status_code= status.HTTP_400_BAD_REQUEST, detail="Invalid or expired token")
+    
+
+
