@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from typing import List
-from src.books.schemas import Book, BookUpdateModel, BookCreateModel
+from .schemas import Book, BookUpdateModel, BookCreateModel, BookDetailModel
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from src.books.service import BookService
 from src.db.main import get_session
@@ -27,7 +27,7 @@ async def create_a_book(book_data: BookCreateModel, session: AsyncSession = Depe
     new_book = await book_service.create_book(book_data,user_id,session)
     return new_book
 
-@book_router.get('/{book_uid}', response_model=Book, dependencies=[role_checker])
+@book_router.get('/{book_uid}', response_model=BookDetailModel, dependencies=[role_checker])
 async def get_book(book_uid: str, session: AsyncSession = Depends(get_session), token_details: dict = Depends(access_token_bearer)) -> dict:
     book = await book_service.get_book(book_uid , session)
     if book:
