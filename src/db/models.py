@@ -68,7 +68,6 @@ class Review(SQLModel, table= True):
     review_text: str
     user_uid: Optional[uuid.UUID] = Field(default=None, foreign_key="users.uid")
     book_uid: Optional[uuid.UUID] = Field(default=None, foreign_key="books.uid")
-    published_date: datetime = Field(sa_column=Column(pg.TIMESTAMP(timezone=True))) 
     created_at: datetime = Field(sa_column=Column(pg.TIMESTAMP(timezone=True),default=datetime.now))
     updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP(timezone=True),default=datetime.now))
     user: Optional[User] = Relationship(back_populates= "reviews")
