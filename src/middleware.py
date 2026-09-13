@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import time
 import logging
 
@@ -23,18 +25,34 @@ def register_middleware(app: FastAPI):
         
         return response
     
-    @app.middleware(app)
-    async def authorization(request: Request, call_next):
-        if not "Authorization" in request.headers:
-            return JSONResponse(
-                content= {
-                    "message" : "Not Authenticated",
-                    "resolution" : "Please provide the right credentials to proceed"
-                }
-            )
+    # @app.middleware(app)
+    # async def authorization(request: Request, call_next):
+    #     if not "Authorization" in request.headers:
+    #         return JSONResponse(
+    #             content= {
+    #                 "message" : "Not Authenticated",
+    #                 "resolution" : "Please provide the right credentials to proceed"
+    #             }
+    #         )
             
-        response = await call_next(request)
+    #     response = await call_next(request)
         
-        return response
+    #     return response
+    
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins= ["*"],
+        allow_methods= ["*"],
+        allow_headers= ["*"],
+        allow_credentials= True
+    )
+    
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=[""]  # if you have a domain just put it here in allowed_hosts
+    )
+    
+    
+    
     
     
