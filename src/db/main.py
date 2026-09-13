@@ -7,9 +7,8 @@ from sqlalchemy.orm import sessionmaker
 
 async_engine = AsyncEngine(
     create_engine(
-    url= config.DATABASE_URL,
-    echo= True
-)
+    url= config.DATABASE_URL
+    )
 )
 
 async def init_db():
