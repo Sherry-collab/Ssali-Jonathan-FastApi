@@ -49,7 +49,7 @@ def register_middleware(app: FastAPI):
     
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=[""]  # if you have a domain just put it here in allowed_hosts
+        allowed_hosts=["127.0.0.1"]  # if you have a domain just put it here in allowed_hosts
     )
     
     
