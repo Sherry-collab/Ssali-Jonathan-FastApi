@@ -12,6 +12,7 @@ from src.db.redis import add_jti_to_blocklist
 from src.errors import UserAlreadyexists, UserNotFound, InvalidCredentials, InvalidToken
 from src.mail import app as mail_app, create_message
 from src.config import config
+from src.db.main import get_session
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -66,6 +67,29 @@ async def create_user_account(user_data: UserCreateModel, sesssion: AsyncSession
         "message": "Account Created! Check email to verify your account",
         "user": new_user
     }
+    
+@auth_router.get('/verify/{token}')
+async def verify_user_account(token: str, session: AsyncSession = Depends(get_session)):
+    token_data = decode_url_safe_token(token)
+    
+    user_email = token_data.get('email')
+    
+    if user_email:
+        user = await user_service.get_user_by_email(user_email, session)
+        
+        if not user:
+            raise UserNotFound()
+        
+        await user_service.update_user(user, {'is_verified': True}, session)
+        
+        return JSONResponse(
+            content={"message": "Account verified successfully"}, 
+            status_code= status.HTTP_200_OK
+        )
+    return JSONResponse(
+        content={"message": "Error occured during verification"},
+        status_code= status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
 
 @auth_router.post('/login',response_model= UserModel)
 async def login_users(login_data: UserLoginModel, session: AsyncSession = Depends(get_session)):
