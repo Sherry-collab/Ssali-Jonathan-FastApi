@@ -4,13 +4,14 @@ from .service import UserService
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.main import get_session
 from fastapi.exceptions import HTTPException
-from .utils import create_access_token,decode_token, verify_passwd
+from .utils import create_access_token,decode_token, verify_passwd, create_url_safe_token, decode_url_safe_token
 from fastapi.responses import JSONResponse
 from datetime import timedelta, datetime
 from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_current_user, RoleChecker
 from src.db.redis import add_jti_to_blocklist
 from src.errors import UserAlreadyexists, UserNotFound, InvalidCredentials, InvalidToken
 from src.mail import app as mail_app, create_message
+from src.config import config
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -34,7 +35,7 @@ async def send_mail(email: EmailModel):
     
     return {"message": "Email sent successfully"}
 
-@auth_router.post('/signup', response_model= UserModel, status_code= status.HTTP_201_CREATED)
+@auth_router.post('/signup', status_code= status.HTTP_201_CREATED)
 async def create_user_account(user_data: UserCreateModel, sesssion: AsyncSession = Depends(get_session)):
     email = user_data.email
     
@@ -45,7 +46,26 @@ async def create_user_account(user_data: UserCreateModel, sesssion: AsyncSession
 
     new_user = await user_service.create_user(user_data, sesssion)
     
-    return new_user
+    token = create_url_safe_token({"email": email})
+    
+    link = f"http://{config.DOMAIN}/api/v1/auth/verify/{token}"
+    
+    html_message = f"""
+    <h1>Verify your Email</h1>
+    <p>Please click this <a href="{link}">link</a> top verify your email</p>
+    """
+    message = create_message(
+                recipients= [email],
+                subject= "Verify your email",
+                body= html_message
+            )
+    
+    await mail_app.send_message(message)
+    
+    return {
+        "message": "Account Created! Check email to verify your account",
+        "user": new_user
+    }
 
 @auth_router.post('/login',response_model= UserModel)
 async def login_users(login_data: UserLoginModel, session: AsyncSession = Depends(get_session)):
